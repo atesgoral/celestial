@@ -1,0 +1,70 @@
+<style>
+body { padding: 0; margin: 0; background: #000; }
+#c { background: #222; }
+</style>
+<canvas id="c" width="500" height="100">
+</canvas>
+<script>
+navigator.requestMIDIAccess()
+  .then((access) => {
+    const c = document.getElementById('c');
+    c.width = c.clientWidth;
+    c.height = c.clientHeight;
+
+    let epoch = null;
+    let midiMessages = [];
+
+    function draw(t) {
+      requestAnimationFrame(draw);
+
+      if (epoch === null) {
+        epoch = performance.now();
+      }
+
+      const x = c.getContext('2d');
+
+      while (midiMessages.length) {
+        const message = midiMessages.shift();
+
+        x.fillStyle = `hsl(${message.command / 256 * 360}, 100%, ${message.velocity / 256 * 50}%)`;
+        x.fillRect((message.t - epoch) / 1000, message.note, 2, 2);
+      }
+    }
+
+    requestAnimationFrame(draw);
+
+    console.log('Got MIDI access!');
+
+    access.onstatechange = (e) => {
+      console.log(e.port.name, e.port.manufacturer, e.port.state);
+
+      if (e.port.state === 'connected') {
+        for (let input of access.inputs.values()) {
+          // console.log('MIDI input:', input);
+
+          input.onmidimessage = (message) => {
+            const [command, note, velocity] = message.data;
+
+            midiMessages.push({
+              t: performance.now(),
+              command,
+              note,
+              velocity
+            });
+
+            switch (command) {
+            case 0x90: // Note on
+              // console.log('Note on', note, velocity);
+              break;
+            case 0x100: // Note off
+              break;
+            }
+          };
+        }
+      }
+    };
+  })
+  .catch((error) => {
+    console.error('Could not get MIDI access:', error);
+  });
+</script>
