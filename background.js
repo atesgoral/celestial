@@ -17,24 +17,27 @@ async function updateInputs(access) {
     const { id, name, manufacturer } = input;
 
     inputs.push({ id, name, manufacturer });
-    // input.onmidimessage = (message) => {
-    //   const [command, note, velocity] = message.data;
 
-    //   midiMessages.push({
-    //     t: performance.now(),
-    //     command,
-    //     note,
-    //     velocity
-    //   });
+    input.onmidimessage = (message) => {
+      const [command, note, velocity] = message.data;
+      const ts = performance.now();
 
-    //   switch (command) {
-    //   case 0x90: // Note on
-    //     // console.log('Note on', note, velocity);
-    //     break;
-    //   case 0x100: // Note off
-    //     break;
-    //   }
-    // };
+      chrome.runtime.sendMessage({ midiMessage: { command, note, velocity, ts } });
+      // midiMessages.push({
+      //   t: performance.now(),
+      //   command,
+      //   note,
+      //   velocity
+      // });
+
+      // switch (command) {
+      // case 0x90: // Note on
+      //   // console.log('Note on', note, velocity);
+      //   break;
+      // case 0x100: // Note off
+      //   break;
+      // }
+    };
   }
 
   await storageSet({ inputs });

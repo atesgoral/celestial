@@ -4,11 +4,16 @@
 <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-<pre id="out"></pre>
-<label for="input">MIDI Input</label>
-<select id="input">
-  <option value="">None</option>
-</select>
+<h1 id="celestial">Celestial</h1>
+<div id="settings">
+  <label for="input">MIDI Input</label>
+  <select id="input">
+    <option value="">None</option>
+  </select>
+</div>
+<div id="status">
+  <canvas id="midi-events"></canvas>
+</div>
 <script src="popup.js"></script>
 </body>
 </html>
