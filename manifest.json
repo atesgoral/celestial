@@ -1,7 +1,7 @@
 {
   "name": "Celestial",
   "version": "0.0.0",
-  "description": "Wraps space and time",
+  "description": "Warps space and time",
   "permissions": [ "activeTab", "storage" ],
   "background": {
     "scripts": [ "background.js" ],
