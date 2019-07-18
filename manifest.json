@@ -1,0 +1,14 @@
+{
+  "name": "Celestial",
+  "version": "0.0.0",
+  "description": "Wraps space and time",
+  "permissions": [ "activeTab", "storage" ],
+  "background": {
+    "scripts": [ "background.js" ],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "manifest_version": 2
+}
