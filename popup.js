@@ -15,7 +15,7 @@ function output(...args) {
 }
 
 async function init() {
-  const { gotMidiAccess, inputs } = await storageGet([ 'gotMidiAccess', 'inputs' ]);
+  const { gotMidiAccess, inputs, selectedInputId } = await storageGet([ 'gotMidiAccess', 'inputs', 'selectedInputId' ]);
 
   output('Got MIDI access:', gotMidiAccess);
 
@@ -26,6 +26,13 @@ async function init() {
       inputEl.innerHTML += `<option value="${id}">${name} by ${manufacturer}</option>`;
     });
   }
+
+  inputEl.value = selectedInputId || "";
+
+  inputEl.addEventListener('change', async () => {
+    const selectedInputId = inputEl.value;
+    await storageSet({ selectedInputId });
+  });
 }
 
 init();

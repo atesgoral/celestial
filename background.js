@@ -8,9 +8,7 @@ async function storageGet(keys) {
   return await thenable((resolve) => chrome.storage.local.get(keys, resolve));
 }
 
-async function handlePortConnected(access, port) {
-  console.log(port.name, port.manufacturer, port.state);
-
+async function updateInputs(access) {
   const inputs = [];
 
   for (let input of access.inputs.values()) {
@@ -42,8 +40,14 @@ async function handlePortConnected(access, port) {
   await storageSet({ inputs });
 }
 
+async function handlePortConnected(access, port) {
+  console.log(port.name, port.manufacturer, port.state);
+  await updateInputs(access);
+}
+
 async function handlePortDisconnected(access, port) {
   console.log(port.name, port.manufacturer, port.state);
+  await updateInputs(access);
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
