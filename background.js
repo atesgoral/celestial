@@ -8,6 +8,8 @@ async function storageGet(keys) {
   return await thenable((resolve) => chrome.storage.local.get(keys, resolve));
 }
 
+const contentPorts = [];
+
 async function updateInputs(access) {
   const inputs = [];
 
@@ -22,7 +24,12 @@ async function updateInputs(access) {
       const [command, note, velocity] = message.data;
       const ts = performance.now();
 
+      // @todo send to celestial-popup port only?
       chrome.runtime.sendMessage({ midiMessage: { command, note, velocity, ts } });
+
+      contentPorts.forEach((port) => {
+        port.postMessage({ midiMessage: { command, note, velocity, ts } });
+      });
       // midiMessages.push({
       //   t: performance.now(),
       //   command,
@@ -80,6 +87,18 @@ chrome.runtime.onMessage.addListener(async (message) => {
   if (message === 'enableOnActiveTab') {
     chrome.tabs.executeScript({
       file: 'content.js'
+    });
+  }
+});
+
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === 'celestial-content') {
+    console.log('Content port connected');
+    contentPorts.push(port);
+
+    port.onDisconnect.addListener(() => {
+      console.log('Content port disconnected');
+      contentPorts.splice(contentPorts.indexOf(port), 1);
     });
   }
 });
