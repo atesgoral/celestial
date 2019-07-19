@@ -8,42 +8,35 @@ async function storageGet(keys) {
   return await thenable((resolve) => chrome.storage.local.get(keys, resolve));
 }
 
-const contentPorts = [];
+const externalPorts = [];
 
 async function updateInputs(access) {
   const inputs = [];
 
   for (let input of access.inputs.values()) {
-    // console.log('MIDI input:', input);
-
     const { id, name, manufacturer } = input;
 
     inputs.push({ id, name, manufacturer });
 
     input.onmidimessage = (message) => {
-      const [command, note, velocity] = message.data;
-      const ts = performance.now();
+      const { timeStamp } = message;
+      const [ status, data1, data2 ] = message.data;
 
-      // @todo send to celestial-popup port only?
-      chrome.runtime.sendMessage({ midiMessage: { command, note, velocity, ts } });
+      // @todo actually interpret MIDI messages
 
-      contentPorts.forEach((port) => {
-        port.postMessage({ midiMessage: { command, note, velocity, ts } });
+      // @todo send to popup port only?
+      chrome.runtime.sendMessage({ type: 'midiMessage', data: { timeStamp } });
+
+      // @todo extremely rudimentary interpretation of MIDI bytes
+      const warp = {
+        sin: status / 256,
+        cos: data1 / 256,
+        time: data2 / 256
+      };
+
+      externalPorts.forEach((port) => {
+        port.postMessage({ type: 'warp', data: warp });
       });
-      // midiMessages.push({
-      //   t: performance.now(),
-      //   command,
-      //   note,
-      //   velocity
-      // });
-
-      // switch (command) {
-      // case 0x90: // Note on
-      //   // console.log('Note on', note, velocity);
-      //   break;
-      // case 0x100: // Note off
-      //   break;
-      // }
     };
   }
 
@@ -65,6 +58,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     const access = await navigator.requestMIDIAccess();
 
     console.log('Got MIDI access');
+
     await storageSet({ gotMidiAccess: true });
 
     access.onstatechange = (event) => {
@@ -83,22 +77,20 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
 });
 
-chrome.runtime.onMessage.addListener(async (message) => {
-  if (message === 'enableOnActiveTab') {
-    chrome.tabs.executeScript({
-      file: 'content.js'
-    });
-  }
-});
+// chrome.runtime.onMessage.addListener(async (message) => {
+//   if (message === 'enableOnActiveTab') {
+//     chrome.tabs.executeScript({
+//       file: 'content.js'
+//     });
+//   }
+// });
 
-chrome.runtime.onConnect.addListener((port) => {
-  if (port.name === 'celestial-content') {
-    console.log('Content port connected');
-    contentPorts.push(port);
+chrome.runtime.onConnectExternal.addListener((port) => {
+    console.log('External port connected');
+    externalPorts.push(port);
 
     port.onDisconnect.addListener(() => {
-      console.log('Content port disconnected');
-      contentPorts.splice(contentPorts.indexOf(port), 1);
+      console.log('External port disconnected');
+      externalPorts.splice(externalPorts.indexOf(port), 1);
     });
-  }
 });

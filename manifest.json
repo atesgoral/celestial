@@ -10,5 +10,14 @@
   "browser_action": {
     "default_popup": "popup.html"
   },
+  "content_scripts": [{
+    "matches": [ "https://dweet.dwitter.net/id/*" ],
+    "run_at": "document_start",
+    "all_frames": true,
+    "js": [ "content.js" ]
+  }],
+  "externally_connectable": {
+    "matches": [ "https://dweet.dwitter.net/id/*" ]
+  },
   "manifest_version": 2
 }
