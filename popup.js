@@ -8,14 +8,6 @@ async function storageGet(keys) {
   return await thenable((resolve) => chrome.storage.local.get(keys, resolve));
 }
 
-function lerp(a1, a2, t) {
-  return a1.map((c1, idx) => {
-    const c2 = a2[idx];
-    const d = c2 - c1;
-    return d * t + c1;
-  });
-}
-
 async function init() {
   const midiInputEl = document.getElementById('midi-input');
   const midiEventsEl = document.getElementById('midi-events');
@@ -23,36 +15,35 @@ async function init() {
   midiEventsEl.width = midiEventsEl.clientWidth;
   midiEventsEl.height = midiEventsEl.clientHeight;
 
-  let lastMidiEventDrawnAt = null;
-  let lastMidiEventReceivedAt = null;
+  const midiChannels = Array(16).fill().map(() => ({
+    lastMidiEventDrawnAt: null,
+    lastMidiEventReceivedAt: null
+  }));
 
   function draw(t) {
-    const EVENT_MAX_AGE = 250;
+    const EVENT_MAX_AGE = 1000 / 60;
     const EVENT_OFF_COLOR = [0, 0, 0];
     const EVENT_ON_COLOR = [153, 255, 51];
 
     requestAnimationFrame(draw);
 
-    if (lastMidiEventReceivedAt === null) {
-      return;
-    }
-
-    if (lastMidiEventDrawnAt === null) {
-      lastMidiEventDrawnAt = lastMidiEventReceivedAt;
-      return;
-    }
-
     const ctx = midiEventsEl.getContext('2d');
 
     ctx.clearRect(0, 0, midiEventsEl.width, midiEventsEl.height);
 
-    const elapsed = lastMidiEventReceivedAt - lastMidiEventDrawnAt;
-    const fade = elapsed <= EVENT_MAX_AGE ? (1 - elapsed / EVENT_MAX_AGE) : 0;
+    midiChannels.forEach((channel, idx) => {
+      let hasRecentMidiEvent = false;
 
-    ctx.fillStyle = `rgb(${lerp(EVENT_OFF_COLOR, EVENT_ON_COLOR, fade)})`;
-    ctx.fillRect(0, 0, midiEventsEl.width, midiEventsEl.height);
+      if (channel.lastMidiEventReceivedAt !== null) {
+        const elapsed = channel.lastMidiEventReceivedAt - channel.lastMidiEventDrawnAt;
+        hasRecentMidiEvent = elapsed <= EVENT_MAX_AGE;
+      }
 
-    lastMidiEventDrawnAt = lastMidiEventReceivedAt;
+      ctx.fillStyle = `rgb(${hasRecentMidiEvent ? EVENT_ON_COLOR : EVENT_OFF_COLOR})`;
+      ctx.fillRect(idx * 17, 0, 16, 16);
+
+      channel.lastMidiEventDrawnAt = channel.lastMidiEventReceivedAt;
+    });
   }
 
   requestAnimationFrame(draw);
@@ -76,8 +67,10 @@ async function init() {
 
   chrome.runtime.onMessage.addListener((message) => {
     switch (message.type) {
-    case 'midiMessage':
-      lastMidiEventReceivedAt = message.data.timeStamp;
+    case 'midi':
+      const { channel, timeStamp } = message.data;
+      console.log(channel);
+      midiChannels[channel].lastMidiEventReceivedAt = timeStamp;
       break;
     }
   });

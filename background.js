@@ -21,17 +21,45 @@ async function updateInputs(access) {
     input.onmidimessage = (message) => {
       const { timeStamp } = message;
       const [ status, data1, data2 ] = message.data;
+      const channel = status & 0x0f;
+      const note = data1;
+      const velocity = data2;
 
-      // @todo actually interpret MIDI messages
+      switch (status & 0xf0) {
+      case 0x80:
+        // Note off
+        break;
+      case 0x90:
+        // Note on
+        break;
+      case 0xa0:
+        // Polyphonic key pressure
+        break;
+      case 0xb0:
+        // Control change
+        break;
+      case 0xc0:
+        // Program change
+        break;
+      case 0xd0:
+        // Channel pressure
+        break;
+      case 0xe0:
+        // Pitch bend
+        break;
+      case 0xf0:
+        // System message
+        return;
+      }
 
       // @todo send to popup port only?
-      chrome.runtime.sendMessage({ type: 'midiMessage', data: { timeStamp } });
+      chrome.runtime.sendMessage({ type: 'midi', data: { channel, timeStamp } });
 
       // @todo extremely rudimentary interpretation of MIDI bytes
       const warp = {
-        sin: status / 256,
-        cos: data1 / 256,
-        time: data2 / 256
+        sin: 1 + ((note - 128) / 128),
+        cos: 1 + ((velocity - 128) / 128),
+        time: 1
       };
 
       externalPorts.forEach((port) => {

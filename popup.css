@@ -38,9 +38,7 @@ select {
   padding: 1rem;
 }
 #midi-events {
-  border-radius: .25rem;
   border: 1px solid #000;
-  box-sizing: border-box;
-  height: .5rem;
-  width: 100%;
+  height: 16px;
+  width: 256px;
 }
