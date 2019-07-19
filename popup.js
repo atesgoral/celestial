@@ -17,7 +17,8 @@ function lerp(a1, a2, t) {
 }
 
 async function init() {
-  const inputEl = document.getElementById('input');
+  const midiInputEl = document.getElementById('midi-input');
+  const enableEl = document.getElementById('enable');
   const midiEventsEl = document.getElementById('midi-events');
 
   midiEventsEl.width = midiEventsEl.clientWidth;
@@ -63,20 +64,23 @@ async function init() {
 
   if (inputs instanceof Array) {
     inputs.forEach(({ id, name, manufacturer }) => {
-      inputEl.innerHTML += `<option value="${id}">${name} by ${manufacturer}</option>`;
+      midiInputEl.innerHTML += `<option value="${id}">${name} by ${manufacturer}</option>`;
     });
   }
 
-  inputEl.value = selectedInputId || "";
+  midiInputEl.value = selectedInputId || "";
 
-  inputEl.addEventListener('change', async () => {
-    const selectedInputId = inputEl.value;
+  midiInputEl.addEventListener('change', async () => {
+    const selectedInputId = midiInputEl.value;
     await storageSet({ selectedInputId });
+  });
+
+  enableEl.addEventListener('click', () => {
+    chrome.runtime.sendMessage('enableOnActiveTab');
   });
 
   chrome.runtime.onMessage.addListener((message) => {
     if (message.midiMessage) {
-
       lastMidiEventReceivedAt = message.midiMessage.ts;
     }
   });

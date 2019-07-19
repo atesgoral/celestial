@@ -75,3 +75,11 @@ chrome.runtime.onInstalled.addListener(async () => {
     await storageSet({ gotMidiAccess: false });
   }
 });
+
+chrome.runtime.onMessage.addListener(async (message) => {
+  if (message === 'enableOnActiveTab') {
+    chrome.tabs.executeScript({
+      file: 'content.js'
+    });
+  }
+});
