@@ -63,8 +63,3 @@ select {
   height: 16px;
   width: 256px;
 }
-#test-led {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-}

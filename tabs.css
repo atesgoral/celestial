@@ -28,20 +28,11 @@
   background: #555;
   opacity: 1;
 }
-/*
-.tabs button:after {
-  content: '';
+.tab-content {
+  background: #555;
+}
+.tabs .led {
   position: absolute;
   top: 2px;
   right: 2px;
-  width: .25rem;
-  height: .25rem;
-  border-radius: .125rem;
-}
-.tabs button[data-status=green]:after {
-  background:rgb(153, 255, 51);
-}
-*/
-.tab-content {
-  background: #555;
 }

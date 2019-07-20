@@ -1,3 +1,14 @@
+const signals = {};
+
+const ports = {
+  write(port, signal) {
+    signals[port] = signal;
+  },
+  read(port) {
+    return signals[port];
+  }
+};
+
 class Led extends React.Component {
   constructor(props) {
     super(props);
@@ -12,6 +23,7 @@ class Led extends React.Component {
     canvas.height = canvas.clientHeight;
 
     const draw = (t) => {
+      const MAX_SIGNAL_AGE = 1000;
       const canvas = this.canvas.current;
 
       if (canvas === null) {
@@ -23,7 +35,19 @@ class Led extends React.Component {
       const ctx = canvas.getContext('2d');
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = Math.random() < 0.5 ? 'red' : 'green';
+
+      const signal = ports.read(this.props.port);
+
+      if (!signal) {
+        return;
+      }
+
+      // @todo make signal interpreation customizable?
+
+      const signalAge = performance.now() - signal.ts;
+      const opacity = 1 - Math.min(signalAge, MAX_SIGNAL_AGE) / MAX_SIGNAL_AGE;
+
+      ctx.fillStyle = `rgba(${signal.color},${opacity})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
 
@@ -37,9 +61,14 @@ class Led extends React.Component {
       'canvas',
       {
         ref: this.canvas,
-        className: 'led',
-        id: this.props.id
+        className: 'led'
       }
     );
   }
 }
+
+Led.ports = ports;
+
+Led.colors = {
+  green: [153, 255, 51]
+};

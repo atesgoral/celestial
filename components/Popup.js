@@ -9,7 +9,7 @@ class Popup extends React.Component {
       channels: Array(16).fill().map((_, idx) => ({
         id: idx.toString(),
         number: idx + 1,
-        lastMidiEventReceivedAt: null
+        ledPort: `midi-channel-${idx}-activity`
       })),
       activeChannelId: '0'
     };
@@ -40,7 +40,11 @@ class Popup extends React.Component {
       switch (message.type) {
       case 'midi':
         const { channel, timeStamp } = message.data;
-        //midiChannels[channel].lastMidiEventReceivedAt = timeStamp;
+
+        Led.ports.write(
+          `midi-channel-${channel}-activity`,
+          { color: Led.colors.green, ts: performance.now() }
+        );
         break;
       }
     });
@@ -61,8 +65,6 @@ class Popup extends React.Component {
   }
 
   render() {
-    const EVENT_MAX_AGE = 1000 / 60;
-
     const e = React.createElement;
 
     return e(
@@ -73,10 +75,6 @@ class Popup extends React.Component {
           'h1',
           { key: 'celestial-title' },
           'Celestial'
-        ),
-        e(
-          Led,
-          { key: 'test-led', id: 'test-led' }
         ),
         e(
           'form',
@@ -126,10 +124,10 @@ class Popup extends React.Component {
               {
                 key: 'channel-tabs',
                 ref: this.channelTabs,
-                tabs: this.state.channels.map(({ id, number, lastMidiEventReceivedAt }) => ({
+                tabs: this.state.channels.map(({ id, number, ledPort }) => ({
                   id,
                   title: number,
-                  status: lastMidiEventReceivedAt <= EVENT_MAX_AGE ? 'green' : ''
+                  ledPort
                 })),
                 activeTabId: this.state.activeChannelId,
                 onActiveTabChange: this.handleActiveChannelTabChange

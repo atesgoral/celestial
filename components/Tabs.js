@@ -29,17 +29,31 @@ class Tabs extends React.Component {
     return e(
       'div',
       { className: 'tabs' },
-      this.props.tabs.map(({ id, title }) => e(
-        'button',
-        {
-          type: 'button',
-          key: id,
-          'data-id': id,
-          'data-active': id === this.state.activeTabId,
-          onClick: this.handleClick
-        },
-        title
-      ))
+      this.props.tabs.map(({ id, title, ledPort }) => {
+        const children = [ title ];
+
+        if (ledPort) {
+          children.push(e(
+            Led,
+            {
+              key: `led-${id}`,
+              port: ledPort
+            }
+          ));
+        }
+
+        return e(
+          'button',
+          {
+            type: 'button',
+            key: id,
+            'data-id': id,
+            'data-active': id === this.state.activeTabId,
+            onClick: this.handleClick
+          },
+          children
+        );
+      })
     );
   }
 }
