@@ -4,7 +4,7 @@ class Popup extends React.Component {
 
     this.state = {
       gotMidiAccess: null,
-      inputs: [{ id: '' }], // @todo rename to midiInputs
+      inputs: [], // @todo rename to midiInputs
       selectedInputId: '', // @todo rename to midiInputId,
       channels: Array(16).fill().map((_, idx) => ({
         id: idx.toString(),
@@ -24,8 +24,6 @@ class Popup extends React.Component {
       .then(({ gotMidiAccess, inputs, selectedInputId, activeChannelId }) => {
         console.log('Got MIDI access:', gotMidiAccess);
 
-        inputs.unshift({ id: '' });
-
         this.setState({
           gotMidiAccess,
           inputs,
@@ -35,6 +33,12 @@ class Popup extends React.Component {
 
         this.channelTabs.current.setActiveTabId(activeChannelId);
       });
+
+    storage.subscribe(({ inputs }) => {
+      this.setState({
+        inputs: inputs.newValue
+      });
+    });
 
     chrome.runtime.onMessage.addListener((message) => {
       switch (message.type) {
@@ -67,6 +71,24 @@ class Popup extends React.Component {
   render() {
     const e = React.createElement;
 
+    const midiInputOptions = this.state.inputs.map(({ id, name, manufacturer }) => e(
+      'option',
+      {
+        value: id,
+        key: id
+      },
+      `${name} by ${manufacturer}`
+    ));
+
+    midiInputOptions.unshift(e(
+      'option',
+      {
+        value: '',
+        key: ''
+      },
+      'None'
+    ));
+
     return e(
       'div',
       null,
@@ -96,14 +118,7 @@ class Popup extends React.Component {
                 value: this.state.selectedInputId,
                 onChange: this.handleInputChange
               },
-              this.state.inputs.map(({ id, name, manufacturer }) => e(
-                'option',
-                {
-                  value: id,
-                  key: id
-                },
-                id ? `${name} by ${manufacturer}` : 'None'
-              ))
+              midiInputOptions
             )
           ]
         ),
