@@ -40,7 +40,7 @@ async function init() {
       }
 
       ctx.fillStyle = `rgb(${hasRecentMidiEvent ? EVENT_ON_COLOR : EVENT_OFF_COLOR})`;
-      ctx.fillRect(idx * 17, 0, 16, 16);
+      ctx.fillRect(idx * 16 + 1, 1, 14, 14);
 
       channel.lastMidiEventDrawnAt = channel.lastMidiEventReceivedAt;
     });
