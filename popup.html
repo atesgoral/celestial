@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script src="vendor/react.development.js" crossorigin></script>
+<script src="vendor/react-dom.development.js" crossorigin></script>
+<script src="utils.js"></script>
+<script src="storage.js"></script>
+<script src="components/Popup.js"></script>
 <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-<h1 id="celestial">Celestial</h1>
-<div id="settings">
-  <label for="midi-input">MIDI Input</label>
-  <select id="midi-input">
-    <option value="">None</option>
-  </select>
-</div>
-<div id="status">
-  <canvas id="midi-events"></canvas>
-</div>
-<script src="popup.js"></script>
+<div id="root"></div>
+<script src="popup.js">
+</script>
 </body>
 </html>

@@ -1,13 +1,3 @@
-const thenable = (then) => ({ then });
-
-async function storageSet(items) {
-  return await thenable((resolve) => chrome.storage.local.set(items, resolve));
-}
-
-async function storageGet(keys) {
-  return await thenable((resolve) => chrome.storage.local.get(keys, resolve));
-}
-
 const externalPorts = [];
 
 async function updateInputs(access) {
@@ -68,7 +58,7 @@ async function updateInputs(access) {
     };
   }
 
-  await storageSet({ inputs });
+  await storage.set({ inputs });
 }
 
 async function handlePortConnected(access, port) {
@@ -87,7 +77,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
     console.log('Got MIDI access');
 
-    await storageSet({ gotMidiAccess: true });
+    await storage.set({ gotMidiAccess: true });
 
     access.onstatechange = (event) => {
       switch (event.port.state) {
@@ -101,7 +91,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     };
   } catch (error) {
     console.log('Could not get MIDI access', error);
-    await storageSet({ gotMidiAccess: false });
+    await storage.set({ gotMidiAccess: false });
   }
 });
 

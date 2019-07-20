@@ -1,15 +1,10 @@
-const thenable = (then) => ({ then });
+ReactDOM.render(
+  React.createElement(Popup),
+  document.getElementById('root')
+);
 
-async function storageSet(items) {
-  return await thenable((resolve) => chrome.storage.local.set(items, resolve));
-}
-
-async function storageGet(keys) {
-  return await thenable((resolve) => chrome.storage.local.get(keys, resolve));
-}
-
+/*
 async function init() {
-  const midiInputEl = document.getElementById('midi-input');
   const midiEventsEl = document.getElementById('midi-events');
 
   midiEventsEl.width = midiEventsEl.clientWidth;
@@ -48,23 +43,6 @@ async function init() {
 
   requestAnimationFrame(draw);
 
-  const { gotMidiAccess, inputs, selectedInputId } = await storageGet([ 'gotMidiAccess', 'inputs', 'selectedInputId' ]);
-
-  console.log('Got MIDI access:', gotMidiAccess);
-
-  if (inputs instanceof Array) {
-    inputs.forEach(({ id, name, manufacturer }) => {
-      midiInputEl.innerHTML += `<option value="${id}">${name} by ${manufacturer}</option>`;
-    });
-  }
-
-  midiInputEl.value = selectedInputId || "";
-
-  midiInputEl.addEventListener('change', async () => {
-    const selectedInputId = midiInputEl.value;
-    await storageSet({ selectedInputId });
-  });
-
   chrome.runtime.onMessage.addListener((message) => {
     switch (message.type) {
     case 'midi':
@@ -77,3 +55,4 @@ async function init() {
 }
 
 init();
+*/
