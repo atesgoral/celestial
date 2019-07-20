@@ -1,0 +1,45 @@
+<style>
+body {
+  background: #333;
+  margin: 0;
+  padding: 1rem;
+}
+</style>
+<canvas id="c" width="300" height="300"></canvas>
+<script>
+const c = document.getElementById('c');
+
+c.width = c.clientWidth;
+c.height = c.clientHeight;
+
+function draw(t) {
+  requestAnimationFrame(draw);
+
+  const ctx = c.getContext('2d');
+
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  const DOT_COUNT = 32;
+  const DOT_RADIUS = 4;
+  const CIRCLE_RADIUS = c.width / 3;
+  const ANGULAR_VELOCITY = Math.PI * 2 / 8000;
+  const phase = t * ANGULAR_VELOCITY;
+
+  for (let i = 0; i < DOT_COUNT; i++) {
+    const a = Math.PI * 2 / DOT_COUNT * i;
+
+    ctx.fillStyle = `hsl(${a / Math.PI * 180}, 100%, 50%)`;
+    ctx.beginPath();
+    ctx.arc(
+      c.width / 2 + Math.cos(a + phase) * CIRCLE_RADIUS,
+      c.height / 2 + Math.sin(a + phase) * CIRCLE_RADIUS,
+      DOT_RADIUS,
+      0, Math.PI * 2
+    );
+    ctx.fill();
+  }
+}
+
+requestAnimationFrame(draw);
+</script>
