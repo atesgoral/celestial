@@ -1,0 +1,47 @@
+.tabs {
+  background: #000;
+  padding: 0 1rem;
+}
+.tabs button {
+  padding: .25rem .5rem;
+  font-size: .75rem;
+  border: 1px solid #000;
+  border-radius: .25rem;
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background: #555;
+  color: #eee;
+  cursor: pointer;
+  opacity: .75;
+  margin-left: -1px;
+  position: relative;
+}
+.tabs button:focus {
+  outline: none;
+  opacity: 1;
+}
+.tabs button:hover {
+  opacity: 1;
+}
+.tabs button[data-active=true] {
+  background: #555;
+  opacity: 1;
+}
+/*
+.tabs button:after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: .25rem;
+  height: .25rem;
+  border-radius: .125rem;
+}
+.tabs button[data-status=green]:after {
+  background:rgb(153, 255, 51);
+}
+*/
+.tab-content {
+  background: #555;
+}
