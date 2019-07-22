@@ -163,6 +163,24 @@ class Popup extends React.Component {
                       'h3',
                       { key: 'channel-title' },
                       `Channel ${this.state.channels[this.state.activeChannelId].number}`
+                    ),
+                    e(
+                      Graph,
+                      {
+                        key: 'sin-graph',
+                        series: [{
+                          fn: (x) => Math.sin(x * Math.PI * 2)
+                        }]
+                      }
+                    ),
+                    e(
+                      Graph,
+                      {
+                        key: 'cos-graph',
+                        series: [{
+                          fn: (x) => Math.cos(x * Math.PI * 2)
+                        }]
+                      }
                     )
                   ]
                 )
