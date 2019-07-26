@@ -35,9 +35,11 @@ class Popup extends React.Component {
       });
 
     storage.subscribe(({ inputs }) => {
-      this.setState({
-        inputs: inputs.newValue
-      });
+      if (inputs) {
+        this.setState({
+          inputs: inputs.newValue
+        });
+      }
     });
 
     chrome.runtime.onMessage.addListener((message) => {
@@ -164,24 +166,24 @@ class Popup extends React.Component {
                       { key: 'channel-title' },
                       `Channel ${this.state.channels[this.state.activeChannelId].number}`
                     ),
-                    e(
-                      Graph,
-                      {
-                        key: 'sin-graph',
-                        series: [{
-                          fn: (x) => Math.sin(x * Math.PI * 2)
-                        }]
-                      }
-                    ),
-                    e(
-                      Graph,
-                      {
-                        key: 'cos-graph',
-                        series: [{
-                          fn: (x) => Math.cos(x * Math.PI * 2)
-                        }]
-                      }
-                    )
+                    // e(
+                    //   Graph,
+                    //   {
+                    //     key: 'sin-graph',
+                    //     series: [{
+                    //       fn: (x) => Math.sin(x * Math.PI * 2)
+                    //     }]
+                    //   }
+                    // ),
+                    // e(
+                    //   Graph,
+                    //   {
+                    //     key: 'cos-graph',
+                    //     series: [{
+                    //       fn: (x) => Math.cos(x * Math.PI * 2)
+                    //     }]
+                    //   }
+                    // )
                   ]
                 )
               ]
