@@ -1,4 +1,7 @@
 class Popup extends React.Component {
+  // @todo cleanup on component unmount?
+  // probably not needed since page gets destroyed
+
   constructor(props) {
     super(props);
 
@@ -42,7 +45,9 @@ class Popup extends React.Component {
       }
     });
 
-    chrome.runtime.onMessage.addListener((message) => {
+    const port = chrome.runtime.connect({ name: 'midi-activity' });
+
+    port.onMessage.addListener((message) => {
       switch (message.type) {
       case 'midi':
         const { channel, timeStamp } = message.data;

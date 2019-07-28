@@ -1,5 +1,6 @@
 let settings = {};
 
+let midiActivityPort = null;
 const externalPorts = [];
 
 async function updateInputs(access) {
@@ -46,15 +47,16 @@ async function updateInputs(access) {
           return;
         }
 
-        // @todo send to popup port only?
-        chrome.runtime.sendMessage({ type: 'midi', data: { channel, timeStamp } });
+        if (midiActivityPort) {
+          midiActivityPort.postMessage({ type: 'midi', data: { channel, timeStamp } });
+        }
 
-        // @todo extremely rudimentary interpretation of MIDI bytes
         const warp = {
           sin: 1 + ((note - 128) / 128),
           cos: 1 + ((velocity - 128) / 128),
           time: 1
         };
+        // @todo send timeStamp as well?
 
         externalPorts.forEach((port) => {
           port.postMessage({ type: 'warp', data: warp });
@@ -111,13 +113,18 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
 });
 
-// chrome.runtime.onMessage.addListener(async (message) => {
-//   if (message === 'enableOnActiveTab') {
-//     chrome.tabs.executeScript({
-//       file: 'content.js'
-//     });
-//   }
-// });
+chrome.runtime.onConnect.addListener((port) => {
+  console.log('Internal port connected');
+
+  if (port.name === 'midi-activity') {
+    midiActivityPort = port;
+  }
+
+  port.onDisconnect.addListener(() => {
+    console.log('Internal port disconnected');
+    midiActivityPort = null;
+  });
+});
 
 chrome.runtime.onConnectExternal.addListener((port) => {
   console.log('External port connected');
