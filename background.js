@@ -1,7 +1,18 @@
 let settings = {};
 
+// @todo may not need dedicated port
 let midiActivityPort = null;
 const externalPorts = [];
+
+const midiNotes = Array(128).fill().map((_, idx) => ({
+  isOn: false,
+  onVelocity: 0,
+  offVelocity: 0,
+  onTimestamp: null,
+  offTimeStamp: null
+}));
+
+let lastMidiEventTimeStamp = null;
 
 async function updateInputs(access) {
   const inputs = [];
@@ -20,12 +31,20 @@ async function updateInputs(access) {
         const note = data1;
         const velocity = data2;
 
+        lastMidiEventTimeStamp = timeStamp;
+
         switch (status & 0xf0) {
         case 0x80:
           // Note off
+          midiNotes[note].isOn = false;
+          midiNotes[note].offVelocity = velocity;
+          midiNotes[note].offTimeStamp = timeStamp;
           break;
         case 0x90:
           // Note on
+          midiNotes[note].isOn = true;
+          midiNotes[note].onVelocity = velocity;
+          midiNotes[note].onTimeStamp = timeStamp;
           break;
         case 0xa0:
           // Polyphonic key pressure
@@ -51,15 +70,8 @@ async function updateInputs(access) {
           midiActivityPort.postMessage({ type: 'midi', data: { channel, timeStamp } });
         }
 
-        const warp = {
-          sin: 1 + ((note - 128) / 128),
-          cos: 1 + ((velocity - 128) / 128),
-          time: 1
-        };
-        // @todo send timeStamp as well?
-
         externalPorts.forEach((port) => {
-          port.postMessage({ type: 'warp', data: warp });
+          port.postMessage({ type: 'notes', data: { midiNotes, lastMidiEventTimeStamp } });
         });
       };
     } else {
@@ -120,9 +132,12 @@ chrome.runtime.onConnect.addListener((port) => {
     midiActivityPort = port;
   }
 
+  externalPorts.push(port);
+
   port.onDisconnect.addListener(() => {
     console.log('Internal port disconnected');
     midiActivityPort = null;
+    externalPorts.splice(externalPorts.indexOf(port), 1);
   });
 });
 

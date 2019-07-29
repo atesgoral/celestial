@@ -3,17 +3,20 @@ const tap = ({ extensionId }) => {
 
   const { sin, cos } = Math;
 
-  let warp = { sin: 1, cos: 1, time: 1 };
+  let midiNotes = [];
+  let lastEventTimeStamp = null;
 
-  Math.sin = (a) => sin(a) * warp.sin;
-  Math.cos = (a) => cos(a) * warp.cos;
+  Math.sin = (a) => sin(a);
+    // const note = a % (Math.PI * 2)
+    //sin(a) * warp.sin;
+  Math.cos = (a) => cos(a);
 
   const port = chrome.runtime.connect(extensionId);
 
   port.onMessage.addListener((message) => {
     switch (message.type) {
-    case 'warp':
-      warp = message.data;
+    case 'notes':
+      let { midiNotes, lastEventTimeStamp } = message.data;
       break;
     }
   });

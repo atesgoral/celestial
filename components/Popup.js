@@ -1,3 +1,5 @@
+const EVENT_DECAY = 1000;
+
 class Popup extends React.Component {
   // @todo cleanup on component unmount?
   // probably not needed since page gets destroyed
@@ -16,6 +18,9 @@ class Popup extends React.Component {
       })),
       activeChannelId: '0'
     };
+
+    this.midiNotes = [];
+    this.lastMidiEventTimeStampDelta = null;
 
     this.channelTabs = React.createRef();
 
@@ -49,12 +54,17 @@ class Popup extends React.Component {
 
     port.onMessage.addListener((message) => {
       switch (message.type) {
+      case 'notes':
+        const {midiNotes, lastMidiEventTimeStamp} = message.data;
+        this.midiNotes = midiNotes;
+        this.lastMidiEventTimeStampDelta = performance.now() - lastMidiEventTimeStamp;
+        break;
       case 'midi':
         const { channel, timeStamp } = message.data;
 
         Led.ports.write(
           `midi-channel-${channel}-activity`,
-          { color: Led.colors.green, ts: performance.now() }
+          { color: Led.colors.green, ts: performance.now() } // @todo use timeStamp
         );
         break;
       }
@@ -171,24 +181,54 @@ class Popup extends React.Component {
                       { key: 'channel-title' },
                       `Channel ${this.state.channels[this.state.activeChannelId].number}`
                     ),
-                    // e(
-                    //   Graph,
-                    //   {
-                    //     key: 'sin-graph',
-                    //     series: [{
-                    //       fn: (x) => Math.sin(x * Math.PI * 2)
-                    //     }]
-                    //   }
-                    // ),
-                    // e(
-                    //   Graph,
-                    //   {
-                    //     key: 'cos-graph',
-                    //     series: [{
-                    //       fn: (x) => Math.cos(x * Math.PI * 2)
-                    //     }]
-                    //   }
-                    // )
+                    e(
+                      Graph,
+                      {
+                        key: 'sin-graph',
+                        series: [{
+                          fn: (x) => {
+                            //return Math.sin(x * Math.PI * 2);
+                            const note = this.midiNotes[x * 128 | 0];
+
+                            if (!note) {
+                              return 0;
+                            }
+
+                            if (note.isOn) {
+                              return note.onVelocity / 128;
+                            } else {
+                              if (note.onVelocity) {
+                                const offAge = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
+                                const multiplier = 1 - Math.min(EVENT_DECAY, offAge) / EVENT_DECAY;
+                                return note.onVelocity / 128 * multiplier;
+                              } else {
+                                return 0;
+                              }
+                            }
+                            // const velocity = note.velocity / 128;
+
+                            // if (note.offTimeStamp) {
+                            //   const NOTE_DECAY = 10000;
+
+                            //   const note_age = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
+                            //   const multiplier = 1 - Math.min(NOTE_DECAY, note_age) / NOTE_DECAY;
+                            //   return velocity * multiplier;
+                            // } else {
+                            //   return velocity;
+                            // }
+                          }
+                        }]
+                      }
+                    ),
+                    e(
+                      Graph,
+                      {
+                        key: 'cos-graph',
+                        series: [{
+                          fn: (x) => Math.cos(x * Math.PI * 2)
+                        }]
+                      }
+                    )
                   ]
                 )
               ]
