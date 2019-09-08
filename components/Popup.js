@@ -109,9 +109,10 @@ class Popup extends React.Component {
     return e(
       'div',
       null,
-      e('h1', 'Celestial'),
+      e('h1', null, 'Celestial'),
       e(
         'form',
+        null,
         e('label', { htmlFor: 'midi-input' }, 'MIDI Input'),
         e(
           'select',
@@ -126,7 +127,7 @@ class Popup extends React.Component {
       e(
         'div',
         { className: 'card' },
-        e('h2', 'Channels'),
+        e('h2', null, 'Channels'),
         e(
           Tabs,
           {
@@ -143,67 +144,67 @@ class Popup extends React.Component {
         e(
           'div',
           { className: 'tab-content' },
-          [
+          e(
+            'form',
+            null,
             e(
-              'form',
-              e(
-                'h3',
-                `Channel ${this.state.channels[this.state.activeChannelId].number}`
-              ),
-              e(
-                Graph,
-                {
-                  series: [{
-                    fn: (x) => {
-                      //return Math.sin(x * Math.PI * 2);
-                      const noteIdx = x * 128 | 0;
-                      const note = this.midiNotes[noteIdx];
+              'h3',
+              null,
+              `Channel ${this.state.channels[this.state.activeChannelId].number}`
+            ),
+            e(
+              Graph,
+              {
+                series: [{
+                  fn: (x) => {
+                    //return Math.sin(x * Math.PI * 2);
+                    const noteIdx = x * 128 | 0;
+                    const note = this.midiNotes[noteIdx];
 
-                      // if (noteIdx === 58 || noteIdx === 60) {
-                      if (x >= 0.46 && x <= 0.47) {
-                        console.log(noteIdx, x);
-                      }
+                    // if (noteIdx === 58 || noteIdx === 60) {
+                    if (x >= 0.46 && x <= 0.47) {
+                      // console.log(noteIdx, x);
+                    }
 
-                      if (!note) {
+                    if (!note) {
+                      return 0;
+                    }
+
+                    if (note.isOn) {
+                      return note.onVelocity / 128;
+                    } else {
+                      if (note.onVelocity) {
+                        const offAge = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
+                        const multiplier = 1 - Math.min(EVENT_DECAY, offAge) / EVENT_DECAY;
+                        return note.onVelocity / 128 * multiplier;
+                      } else {
                         return 0;
                       }
-
-                      if (note.isOn) {
-                        return note.onVelocity / 128;
-                      } else {
-                        if (note.onVelocity) {
-                          const offAge = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
-                          const multiplier = 1 - Math.min(EVENT_DECAY, offAge) / EVENT_DECAY;
-                          return note.onVelocity / 128 * multiplier;
-                        } else {
-                          return 0;
-                        }
-                      }
-                      // const velocity = note.velocity / 128;
-
-                      // if (note.offTimeStamp) {
-                      //   const NOTE_DECAY = 10000;
-
-                      //   const note_age = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
-                      //   const multiplier = 1 - Math.min(NOTE_DECAY, note_age) / NOTE_DECAY;
-                      //   return velocity * multiplier;
-                      // } else {
-                      //   return velocity;
-                      // }
                     }
-                  }]
-                }
-              ),
-              e(
-                Graph,
-                {
-                  series: [{
-                    fn: (x) => Math.cos(x * Math.PI * 2)
-                  }]
-                }
-              )
+                    // const velocity = note.velocity / 128;
+
+                    // if (note.offTimeStamp) {
+                    //   const NOTE_DECAY = 10000;
+
+                    //   const note_age = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
+                    //   const multiplier = 1 - Math.min(NOTE_DECAY, note_age) / NOTE_DECAY;
+                    //   return velocity * multiplier;
+                    // } else {
+                    //   return velocity;
+                    // }
+                  }
+                }]
+              }
+            ),
+            e(
+              Graph,
+              {
+                series: [{
+                  fn: (x) => Math.cos(x * Math.PI * 2)
+                }]
+              }
             )
-          ]
+          )
         )
       )
     );
