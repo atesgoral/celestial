@@ -109,139 +109,103 @@ class Popup extends React.Component {
     return e(
       'div',
       null,
-      [
+      e('h1', 'Celestial'),
+      e(
+        'form',
+        e('label', { htmlFor: 'midi-input' }, 'MIDI Input'),
         e(
-          'h1',
-          { key: 'celestial-title' },
-          'Celestial'
-        ),
+          'select',
+          {
+            id: 'midi-input',
+            value: this.state.selectedInputId,
+            onChange: this.handleInputChange
+          },
+          midiInputOptions
+        )
+      ),
+      e(
+        'div',
+        { className: 'card' },
+        e('h2', 'Channels'),
         e(
-          'form',
-          { key: 'settings' },
-          [
-            e(
-              'label',
-              {
-                key: 'midi-input-label',
-                htmlFor: 'midi-input'
-              },
-              'MIDI Input'
-            ),
-            e(
-              'select',
-              {
-                key: 'midi-input',
-                id: 'midi-input',
-                value: this.state.selectedInputId,
-                onChange: this.handleInputChange
-              },
-              midiInputOptions
-            )
-          ]
+          Tabs,
+          {
+            ref: this.channelTabs,
+            tabs: this.state.channels.map(({ id, number, ledPort }) => ({
+              id,
+              title: number,
+              ledPort
+            })),
+            activeTabId: this.state.activeChannelId,
+            onActiveTabChange: this.handleActiveChannelTabChange
+          }
         ),
         e(
           'div',
-          {
-            key: 'channels',
-            className: 'card'
-          },
+          { className: 'tab-content' },
           [
             e(
-              'h2',
-              { key: 'channels-title' },
-              'Channels'
-            ),
-            e(
-              Tabs,
-              {
-                key: 'channel-tabs',
-                ref: this.channelTabs,
-                tabs: this.state.channels.map(({ id, number, ledPort }) => ({
-                  id,
-                  title: number,
-                  ledPort
-                })),
-                activeTabId: this.state.activeChannelId,
-                onActiveTabChange: this.handleActiveChannelTabChange
-              }
-            ),
-            e(
-              'div',
-              {
-                key: 'channel-tab',
-                className: 'tab-content'
-              },
-              [
-                e(
-                  'form',
-                  { key: 'channel-settings' },
-                  [
-                    e(
-                      'h3',
-                      { key: 'channel-title' },
-                      `Channel ${this.state.channels[this.state.activeChannelId].number}`
-                    ),
-                    e(
-                      Graph,
-                      {
-                        key: 'sin-graph',
-                        series: [{
-                          fn: (x) => {
-                            //return Math.sin(x * Math.PI * 2);
-                            const noteIdx = x * 128 | 0;
-                            const note = this.midiNotes[noteIdx];
+              'form',
+              e(
+                'h3',
+                `Channel ${this.state.channels[this.state.activeChannelId].number}`
+              ),
+              e(
+                Graph,
+                {
+                  series: [{
+                    fn: (x) => {
+                      //return Math.sin(x * Math.PI * 2);
+                      const noteIdx = x * 128 | 0;
+                      const note = this.midiNotes[noteIdx];
 
-                            // if (noteIdx === 58 || noteIdx === 60) {
-                            if (x >= 0.46 && x <= 0.47) {
-                              console.log(noteIdx, x);
-                            }
-
-                            if (!note) {
-                              return 0;
-                            }
-
-                            if (note.isOn) {
-                              return note.onVelocity / 128;
-                            } else {
-                              if (note.onVelocity) {
-                                const offAge = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
-                                const multiplier = 1 - Math.min(EVENT_DECAY, offAge) / EVENT_DECAY;
-                                return note.onVelocity / 128 * multiplier;
-                              } else {
-                                return 0;
-                              }
-                            }
-                            // const velocity = note.velocity / 128;
-
-                            // if (note.offTimeStamp) {
-                            //   const NOTE_DECAY = 10000;
-
-                            //   const note_age = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
-                            //   const multiplier = 1 - Math.min(NOTE_DECAY, note_age) / NOTE_DECAY;
-                            //   return velocity * multiplier;
-                            // } else {
-                            //   return velocity;
-                            // }
-                          }
-                        }]
+                      // if (noteIdx === 58 || noteIdx === 60) {
+                      if (x >= 0.46 && x <= 0.47) {
+                        console.log(noteIdx, x);
                       }
-                    ),
-                    e(
-                      Graph,
-                      {
-                        key: 'cos-graph',
-                        series: [{
-                          fn: (x) => Math.cos(x * Math.PI * 2)
-                        }]
+
+                      if (!note) {
+                        return 0;
                       }
-                    )
-                  ]
-                )
-              ]
+
+                      if (note.isOn) {
+                        return note.onVelocity / 128;
+                      } else {
+                        if (note.onVelocity) {
+                          const offAge = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
+                          const multiplier = 1 - Math.min(EVENT_DECAY, offAge) / EVENT_DECAY;
+                          return note.onVelocity / 128 * multiplier;
+                        } else {
+                          return 0;
+                        }
+                      }
+                      // const velocity = note.velocity / 128;
+
+                      // if (note.offTimeStamp) {
+                      //   const NOTE_DECAY = 10000;
+
+                      //   const note_age = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
+                      //   const multiplier = 1 - Math.min(NOTE_DECAY, note_age) / NOTE_DECAY;
+                      //   return velocity * multiplier;
+                      // } else {
+                      //   return velocity;
+                      // }
+                    }
+                  }]
+                }
+              ),
+              e(
+                Graph,
+                {
+                  series: [{
+                    fn: (x) => Math.cos(x * Math.PI * 2)
+                  }]
+                }
+              )
             )
           ]
         )
-      ]
+      )
     );
   }
 }
