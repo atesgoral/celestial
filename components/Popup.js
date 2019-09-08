@@ -188,7 +188,13 @@ class Popup extends React.Component {
                         series: [{
                           fn: (x) => {
                             //return Math.sin(x * Math.PI * 2);
-                            const note = this.midiNotes[x * 128 | 0];
+                            const noteIdx = x * 128 | 0;
+                            const note = this.midiNotes[noteIdx];
+
+                            // if (noteIdx === 58 || noteIdx === 60) {
+                            if (x >= 0.46 && x <= 0.47) {
+                              console.log(noteIdx, x);
+                            }
 
                             if (!note) {
                               return 0;

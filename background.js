@@ -8,7 +8,7 @@ const midiNotes = Array(128).fill().map((_, idx) => ({
   isOn: false,
   onVelocity: 0,
   offVelocity: 0,
-  onTimestamp: null,
+  onTimeStamp: null,
   offTimeStamp: null
 }));
 
