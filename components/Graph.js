@@ -38,7 +38,7 @@ class Graph extends React.Component {
       ctx.lineTo(canvas.width / canvas.height, 0);
       ctx.stroke();
 
-      const SUBDIVISIONS = 100;
+      const SUBDIVISIONS = 128;
 
       const series = this.props.series[0];
 
