@@ -2,14 +2,25 @@ const tap = ({ extensionId }) => {
   console.log('Tapping!');
 
   const { sin, cos } = Math;
+  const { requestAnimationFrame } = window;
 
   let midiNotes = [];
   let lastEventTimeStamp = null;
 
-  Math.sin = (a) => sin(a);
+  Math.sin = (a) => {
+    return sin(a);
+  };
     // const note = a % (Math.PI * 2)
     //sin(a) * warp.sin;
-  Math.cos = (a) => cos(a);
+  Math.cos = (a) => {
+    return cos(a);
+  };
+
+  window.requestAnimationFrame = (callback) => {
+    return requestAnimationFrame((t) => {
+      callback(t);
+    });
+  };
 
   const port = chrome.runtime.connect(extensionId);
 
