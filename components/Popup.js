@@ -158,10 +158,10 @@ class Popup extends React.Component {
                 series: [{
                   fn: (x) => {
                     //return Math.sin(x * Math.PI * 2);
-                    const noteIdx = x * 128 | 0;
+                    const noteIdx = x * 128 | 0; // @todo potentially mod by octave to just get 12 values
                     const note = this.midiNotes[noteIdx];
 
-                    if (!note) {
+                    if (!note) { // @todo this shouldn't happen
                       return 0;
                     }
 
@@ -170,8 +170,8 @@ class Popup extends React.Component {
                     } else {
                       if (note.onVelocity) {
                         const offAge = performance.now() - this.lastMidiEventTimeStampDelta - note.offTimeStamp;
-                        const multiplier = 1 - Math.min(EVENT_DECAY, offAge) / EVENT_DECAY;
-                        return note.onVelocity / 128 * multiplier;
+                        const decay = 1 - Math.min(EVENT_DECAY, offAge) / EVENT_DECAY;
+                        return note.onVelocity / 128 * decay;
                       } else {
                         return 0;
                       }
